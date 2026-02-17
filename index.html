@@ -104,6 +104,22 @@
     }
     .api-save-btn:hover { background: var(--accent); }
 
+    /* ── Demo Banner ── */
+    .demo-banner {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      background: #EAF4EE;
+      border: 1px solid #b5d9c3;
+      border-radius: var(--radius);
+      margin-bottom: 28px;
+      font-size: 0.82rem;
+      color: var(--green);
+    }
+    .demo-banner strong { font-weight: 700; }
+    .demo-banner.hidden { display: none; }
+
     /* ── Search / Input ── */
     .craving-section { margin-bottom: 28px; }
     .craving-label {
@@ -485,6 +501,12 @@
     <button class="api-save-btn" onclick="saveApiKey()">Save</button>
   </div>
 
+  <!-- Demo Banner -->
+  <div class="demo-banner" id="demoBanner">
+    <span>✦</span>
+    <span><strong>Demo mode</strong> — no API key needed. Enter anything below to see a sample recipe. Add your own key above to generate real AI recipes.</span>
+  </div>
+
   <!-- Craving Input -->
   <section class="craving-section">
     <div class="craving-label">What are you craving?</div>
@@ -631,6 +653,95 @@
     document.getElementById('statusBar').className = 'status-bar';
   }
 
+  /* ── Demo mode ── */
+  const DEMO_RECIPES = [
+    {
+      name: "Smoky Chipotle Chicken Bowl",
+      description: "Juicy chicken thighs charred with chipotle and smoked paprika, piled over cilantro-lime rice with pickled jalapeños and avocado crema. Bold, smoky heat balanced with cool creaminess.",
+      prepTime: "12 mins", cookTime: "20 mins", servings: 2,
+      ingredients: [
+        { amount: "400g", item: "boneless chicken thighs" },
+        { amount: "1 tbsp", item: "chipotle paste" },
+        { amount: "1 tsp", item: "smoked paprika" },
+        { amount: "200g", item: "cooked brown rice" },
+        { amount: "1", item: "avocado" },
+        { amount: "2 tbsp", item: "Greek yoghurt" },
+        { amount: "1 handful", item: "fresh cilantro" },
+        { amount: "2 tbsp", item: "pickled jalapeños" },
+        { amount: "1", item: "lime, juiced" },
+      ],
+      steps: [
+        "Coat chicken in chipotle paste, smoked paprika, salt and a drizzle of olive oil.",
+        "Heat a cast-iron pan over high heat. Cook chicken 6–7 mins per side until charred and cooked through. Rest 5 mins, then slice.",
+        "Blend avocado with Greek yoghurt, lime juice and a pinch of salt to make crema.",
+        "Fluff rice with cilantro and lime zest. Divide into bowls.",
+        "Top with sliced chicken, avocado crema and pickled jalapeños. Serve immediately."
+      ],
+      macros: { calories: 520, protein: 48, carbs: 38, fat: 18 },
+      tags: ["high-protein", "smoky", "Mexican", "gluten-free"]
+    },
+    {
+      name: "Spicy Asian Beef & Noodles",
+      description: "Seared ground beef glazed in gochujang and soy tossed through chewy udon noodles with crispy scallions and a soft-boiled egg. Umami-rich, fiery and deeply satisfying.",
+      prepTime: "10 mins", cookTime: "15 mins", servings: 2,
+      ingredients: [
+        { amount: "350g", item: "lean ground beef (95%)" },
+        { amount: "200g", item: "udon noodles" },
+        { amount: "2 tbsp", item: "gochujang paste" },
+        { amount: "2 tbsp", item: "soy sauce" },
+        { amount: "1 tbsp", item: "sesame oil" },
+        { amount: "1 tsp", item: "fresh ginger, grated" },
+        { amount: "2 cloves", item: "garlic, minced" },
+        { amount: "2", item: "soft-boiled eggs" },
+        { amount: "3", item: "spring onions, sliced" },
+        { amount: "1 tsp", item: "toasted sesame seeds" },
+      ],
+      steps: [
+        "Cook udon per packet instructions. Drain and rinse.",
+        "Soft-boil eggs for 6.5 mins, transfer to ice water, peel and halve.",
+        "Brown beef in a hot wok over high heat, breaking apart, until caramelized — about 5 mins.",
+        "Add garlic and ginger, cook 1 min. Add gochujang, soy and sesame oil. Toss to coat.",
+        "Add noodles to wok and toss everything together over high heat for 2 mins.",
+        "Plate and top with egg halves, spring onions and sesame seeds."
+      ],
+      macros: { calories: 590, protein: 52, carbs: 48, fat: 17 },
+      tags: ["high-protein", "spicy", "Asian", "quick"]
+    },
+    {
+      name: "Lemon-Herb Salmon with White Bean Mash",
+      description: "Pan-seared salmon with a golden crust, resting on silky white bean mash with roasted garlic and fresh dill. Bright, herbaceous and loaded with protein from both fish and legumes.",
+      prepTime: "10 mins", cookTime: "18 mins", servings: 2,
+      ingredients: [
+        { amount: "2 × 180g", item: "salmon fillets, skin-on" },
+        { amount: "1 can (400g)", item: "cannellini beans, drained" },
+        { amount: "3 cloves", item: "garlic" },
+        { amount: "2 tbsp", item: "olive oil" },
+        { amount: "1", item: "lemon, zest and juice" },
+        { amount: "2 tbsp", item: "fresh dill, chopped" },
+        { amount: "2 tbsp", item: "fresh parsley, chopped" },
+        { amount: "60ml", item: "low-sodium chicken stock" },
+        { amount: "1 tsp", item: "capers" },
+      ],
+      steps: [
+        "Smash garlic and sauté in 1 tbsp olive oil until golden. Add beans and stock, simmer 5 mins.",
+        "Mash beans roughly with a fork, stir in lemon zest and half the herbs. Season well.",
+        "Pat salmon dry and season with salt and pepper.",
+        "Heat remaining oil in a non-stick pan over high heat. Place salmon skin-side down, press gently, cook 4 mins. Flip, cook 2 more mins.",
+        "Serve salmon over bean mash. Squeeze lemon over top, scatter capers and remaining herbs."
+      ],
+      macros: { calories: 490, protein: 46, carbs: 28, fat: 20 },
+      tags: ["high-protein", "Mediterranean", "omega-3", "gluten-free"]
+    },
+  ];
+
+  let demoIndex = 0;
+
+  function updateDemoBanner() {
+    const key = apiKeyInput.value.trim() || localStorage.getItem('macro_api_key') || '';
+    document.getElementById('demoBanner').classList.toggle('hidden', !!key);
+  }
+  apiKeyInput.addEventListener('input', updateDemoBanner);
+
   /* ── Generate ── */
   async function generate() {
     const craving = document.getElementById('cravingInput').value.trim();
@@ -640,8 +751,20 @@
       document.getElementById('cravingInput').focus();
       return;
     }
+
+    // Demo mode — no API key needed
     if (!apiKey) {
-      showError('Please enter your Anthropic API key above.');
+      const btn = document.getElementById('generateBtn');
+      btn.disabled = true;
+      document.getElementById('recipeCard').className = 'recipe-card';
+      showLoading('Loading demo recipe…');
+      await new Promise(r => setTimeout(r, 800)); // brief fake delay
+      const recipe = DEMO_RECIPES[demoIndex % DEMO_RECIPES.length];
+      demoIndex++;
+      currentRecipe = recipe;
+      renderRecipe(recipe);
+      hideStatus();
+      btn.disabled = false;
       return;
     }
 
@@ -824,6 +947,7 @@ Rules:
   }
 
   /* ── Init ── */
+  updateDemoBanner();
   renderSaved();
 </script>
 </body>
