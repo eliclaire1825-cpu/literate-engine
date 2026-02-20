@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Macro — High-Protein Recipes</title>
+  <title>Macro — Smart Recipe Finder</title>
   <style>
     /* ── Reset & Base ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -14,9 +14,12 @@
       --ink:     #1A1814;
       --ink2:    #4A4640;
       --ink3:    #8A8480;
-      --accent:  #D4622A;       /* warm burnt-orange for protein hero */
+      --accent:  #D4622A;
       --accent2: #F0E6D8;
       --green:   #2C6E49;
+      --green2:  #EAF4EE;
+      --blue:    #2563EB;
+      --blue2:   #EFF6FF;
       --border:  #DDD8CF;
       --radius:  10px;
       --serif:   'Georgia', 'Times New Roman', serif;
@@ -32,455 +35,316 @@
       min-height: 100vh;
     }
 
-    /* ── Layout ── */
-    .page { max-width: 760px; margin: 0 auto; padding: 0 20px 80px; }
+    .page { max-width: 820px; margin: 0 auto; padding: 0 20px 80px; }
 
     /* ── Header ── */
     .site-header {
       display: flex;
-      align-items: baseline;
+      align-items: center;
       justify-content: space-between;
-      padding: 32px 0 24px;
+      padding: 28px 0 20px;
       border-bottom: 1.5px solid var(--border);
-      margin-bottom: 40px;
+      margin-bottom: 0;
       gap: 16px;
       flex-wrap: wrap;
     }
-    .logo {
-      font-family: var(--serif);
-      font-size: 2rem;
-      font-weight: 400;
-      letter-spacing: -0.04em;
-      color: var(--ink);
-    }
+    .logo { font-family: var(--serif); font-size: 1.9rem; font-weight: 400; letter-spacing: -0.04em; }
     .logo span { color: var(--accent); }
-
-    .tagline {
-      font-size: 0.8rem;
-      color: var(--ink3);
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-    }
+    .tagline { font-size: 0.75rem; color: var(--ink3); letter-spacing: 0.06em; text-transform: uppercase; margin-top: 2px; }
 
     /* ── API Key ── */
     .api-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 36px;
-      background: var(--cream2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 12px 16px;
+      display: flex; align-items: center; gap: 10px;
+      background: var(--cream2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 10px 14px;
     }
-    .api-row label {
-      font-size: 0.72rem;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--ink3);
-      white-space: nowrap;
-    }
-    .api-row input[type="password"] {
-      flex: 1;
-      border: none;
-      background: transparent;
-      font-family: 'Courier New', monospace;
-      font-size: 0.82rem;
-      color: var(--ink2);
-      outline: none;
-    }
+    .api-row label { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink3); white-space: nowrap; }
+    .api-row input[type="password"] { flex: 1; border: none; background: transparent; font-family: 'Courier New', monospace; font-size: 0.8rem; color: var(--ink2); outline: none; }
     .api-row input[type="password"]::placeholder { color: var(--ink3); }
-    .api-save-btn {
-      font-size: 0.75rem;
-      background: var(--ink);
-      color: var(--cream);
-      border: none;
-      border-radius: 6px;
-      padding: 6px 12px;
-      cursor: pointer;
-      font-weight: 500;
-      white-space: nowrap;
-    }
+    .api-save-btn { font-size: 0.72rem; background: var(--ink); color: var(--cream); border: none; border-radius: 6px; padding: 5px 11px; cursor: pointer; font-weight: 500; white-space: nowrap; }
     .api-save-btn:hover { background: var(--accent); }
 
     /* ── Demo Banner ── */
     .demo-banner {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 16px;
-      background: #EAF4EE;
-      border: 1px solid #b5d9c3;
-      border-radius: var(--radius);
-      margin-bottom: 28px;
-      font-size: 0.82rem;
-      color: var(--green);
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 14px; background: var(--green2);
+      border: 1px solid #b5d9c3; border-radius: var(--radius);
+      font-size: 0.8rem; color: var(--green);
     }
     .demo-banner strong { font-weight: 700; }
     .demo-banner.hidden { display: none; }
 
-    /* ── Search / Input ── */
-    .craving-section { margin-bottom: 28px; }
-    .craving-label {
-      font-family: var(--serif);
-      font-size: 1.5rem;
-      font-weight: 400;
-      margin-bottom: 16px;
-      color: var(--ink);
+    /* ── Tab Navigation ── */
+    .tab-nav {
+      display: flex; gap: 0; border-bottom: 1.5px solid var(--border);
+      margin: 24px 0 0;
     }
-    .craving-row {
-      display: flex;
-      gap: 10px;
+    .tab-btn {
+      padding: 10px 20px; border: none; background: transparent;
+      font-family: var(--sans); font-size: 0.88rem; font-weight: 500;
+      color: var(--ink3); cursor: pointer; border-bottom: 2.5px solid transparent;
+      margin-bottom: -1.5px; transition: color 0.15s, border-color 0.15s;
+      white-space: nowrap;
     }
+    .tab-btn:hover { color: var(--ink); }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .tab-panel { display: none; padding-top: 28px; }
+    .tab-panel.active { display: block; }
+
+    /* ── Card container ── */
+    .card {
+      background: #fff; border: 1.5px solid var(--border);
+      border-radius: 12px; padding: 20px 22px; margin-bottom: 18px;
+    }
+    .card-title {
+      font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--ink3); margin-bottom: 14px; font-weight: 600;
+    }
+
+    /* ── Macro Targets ── */
+    .preset-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .preset-btn {
+      padding: 7px 14px; border: 1.5px solid var(--border); border-radius: 999px;
+      font-size: 0.8rem; cursor: pointer; background: #fff; color: var(--ink2);
+      font-weight: 500; transition: all 0.15s;
+    }
+    .preset-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent2); }
+    .preset-btn.active { border-color: var(--accent); background: var(--accent); color: #fff; }
+
+    .macro-inputs {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+    }
+    @media (max-width: 500px) { .macro-inputs { grid-template-columns: repeat(2, 1fr); } }
+
+    .macro-input-group label {
+      display: block; font-size: 0.65rem; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--ink3); margin-bottom: 4px; font-weight: 600;
+    }
+    .macro-input-group input {
+      width: 100%; padding: 8px 10px; border: 1.5px solid var(--border);
+      border-radius: 8px; font-size: 0.9rem; font-family: var(--sans);
+      background: var(--cream); color: var(--ink); outline: none; text-align: center;
+      transition: border-color 0.15s;
+    }
+    .macro-input-group input:focus { border-color: var(--accent); background: #fff; }
+    .macro-input-group .unit { font-size: 0.62rem; color: var(--ink3); text-align: center; margin-top: 3px; }
+
+    /* ── Diet Chips ── */
+    .chips { display: flex; flex-wrap: wrap; gap: 7px; }
+    .chip {
+      padding: 6px 13px; border: 1.5px solid var(--border); border-radius: 999px;
+      font-size: 0.8rem; cursor: pointer; color: var(--ink2); background: #fff;
+      transition: all 0.15s; user-select: none;
+    }
+    .chip:hover { border-color: var(--accent); color: var(--accent); background: var(--accent2); }
+    .chip.active { border-color: var(--green); background: var(--green2); color: var(--green); }
+
+    /* ── Search Mode ── */
+    .search-mode-row { display: flex; gap: 0; border: 1.5px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 14px; }
+    .mode-btn {
+      flex: 1; padding: 8px 14px; border: none; background: #fff; font-family: var(--sans);
+      font-size: 0.82rem; font-weight: 500; color: var(--ink3); cursor: pointer;
+      transition: all 0.15s; border-right: 1px solid var(--border);
+    }
+    .mode-btn:last-child { border-right: none; }
+    .mode-btn.active { background: var(--ink); color: var(--cream); }
+
+    .craving-label { font-family: var(--serif); font-size: 1.35rem; font-weight: 400; margin-bottom: 12px; }
+    .search-row { display: flex; gap: 10px; }
     .craving-input {
-      flex: 1;
-      padding: 14px 18px;
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius);
-      font-size: 1rem;
-      font-family: var(--sans);
-      background: #fff;
-      color: var(--ink);
-      outline: none;
-      transition: border-color 0.18s;
+      flex: 1; padding: 13px 16px; border: 1.5px solid var(--border);
+      border-radius: var(--radius); font-size: 0.97rem; font-family: var(--sans);
+      background: #fff; color: var(--ink); outline: none; transition: border-color 0.18s;
     }
     .craving-input:focus { border-color: var(--accent); }
     .craving-input::placeholder { color: var(--ink3); }
 
+    .ingredient-area {
+      width: 100%; padding: 13px 16px; border: 1.5px solid var(--border);
+      border-radius: var(--radius); font-size: 0.9rem; font-family: var(--sans);
+      background: #fff; color: var(--ink); outline: none; resize: vertical;
+      min-height: 90px; transition: border-color 0.18s; line-height: 1.5;
+    }
+    .ingredient-area:focus { border-color: var(--accent); }
+    .ingredient-area::placeholder { color: var(--ink3); }
+
     .generate-btn {
-      padding: 14px 24px;
-      background: var(--ink);
-      color: var(--cream);
-      border: none;
-      border-radius: var(--radius);
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      letter-spacing: 0.01em;
-      transition: background 0.18s, transform 0.1s;
-      white-space: nowrap;
+      padding: 13px 22px; background: var(--ink); color: var(--cream); border: none;
+      border-radius: var(--radius); font-size: 0.93rem; font-weight: 600;
+      cursor: pointer; letter-spacing: 0.01em; transition: background 0.18s, transform 0.1s;
+      white-space: nowrap; align-self: flex-start;
     }
     .generate-btn:hover:not(:disabled) { background: var(--accent); }
     .generate-btn:active:not(:disabled) { transform: scale(0.98); }
     .generate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* ── Chips ── */
-    .chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 14px;
+    .suggestion-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+    .suggestion-chip {
+      padding: 6px 12px; border: 1.5px solid var(--border); border-radius: 999px;
+      font-size: 0.78rem; cursor: pointer; color: var(--ink2); background: #fff;
+      transition: all 0.15s;
     }
-    .chip {
-      padding: 7px 14px;
-      border: 1.5px solid var(--border);
-      border-radius: 999px;
-      font-size: 0.82rem;
-      cursor: pointer;
-      color: var(--ink2);
-      background: #fff;
-      transition: border-color 0.15s, background 0.15s, color 0.15s;
-      user-select: none;
-    }
-    .chip:hover {
-      border-color: var(--accent);
-      background: var(--accent2);
-      color: var(--accent);
-    }
+    .suggestion-chip:hover { border-color: var(--accent); background: var(--accent2); color: var(--accent); }
 
     /* ── Status / Error ── */
     .status-bar {
-      display: none;
-      align-items: center;
-      gap: 10px;
-      padding: 14px 18px;
-      border-radius: var(--radius);
-      margin-bottom: 28px;
-      font-size: 0.88rem;
+      display: none; align-items: center; gap: 10px; padding: 13px 16px;
+      border-radius: var(--radius); margin-bottom: 22px; font-size: 0.87rem;
     }
-    .status-bar.loading {
-      display: flex;
-      background: var(--accent2);
-      color: var(--accent);
-      border: 1px solid #e8c5a8;
-    }
-    .status-bar.error {
-      display: flex;
-      background: #FDE8E8;
-      color: #C0392B;
-      border: 1px solid #F5C6C6;
-    }
-    .spinner {
-      width: 18px; height: 18px;
-      border: 2.5px solid currentColor;
-      border-top-color: transparent;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      flex-shrink: 0;
-    }
+    .status-bar.loading { display: flex; background: var(--accent2); color: var(--accent); border: 1px solid #e8c5a8; }
+    .status-bar.error { display: flex; background: #FDE8E8; color: #C0392B; border: 1px solid #F5C6C6; }
+    .spinner { width: 17px; height: 17px; border: 2.5px solid currentColor; border-top-color: transparent; border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     /* ── Recipe Card ── */
-    .recipe-card {
-      display: none;
-      background: #fff;
-      border: 1.5px solid var(--border);
-      border-radius: 14px;
-      overflow: hidden;
-      margin-bottom: 40px;
-      animation: slideUp 0.35s ease;
-    }
+    .recipe-card { display: none; background: #fff; border: 1.5px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 36px; animation: slideUp 0.35s ease; }
     .recipe-card.visible { display: block; }
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(18px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 
-    .recipe-header {
-      padding: 30px 30px 22px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 16px;
-    }
+    .recipe-header { padding: 26px 28px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; }
     .recipe-title-block { flex: 1; }
-    .recipe-name {
-      font-family: var(--serif);
-      font-size: 1.9rem;
-      font-weight: 400;
-      line-height: 1.15;
-      letter-spacing: -0.03em;
-      color: var(--ink);
-      margin-bottom: 8px;
-    }
-    .recipe-desc {
-      font-size: 0.9rem;
-      color: var(--ink2);
-      line-height: 1.55;
-      max-width: 520px;
-    }
-    .save-btn {
-      padding: 9px 16px;
-      border: 1.5px solid var(--border);
-      border-radius: 8px;
-      background: transparent;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      color: var(--ink2);
-      white-space: nowrap;
-      transition: all 0.15s;
-    }
+    .recipe-name { font-family: var(--serif); font-size: 1.8rem; font-weight: 400; line-height: 1.15; letter-spacing: -0.03em; color: var(--ink); margin-bottom: 7px; }
+    .recipe-desc { font-size: 0.88rem; color: var(--ink2); line-height: 1.55; max-width: 500px; }
+
+    .recipe-actions { display: flex; gap: 8px; flex-shrink: 0; }
+    .save-btn { padding: 8px 14px; border: 1.5px solid var(--border); border-radius: 8px; background: transparent; font-size: 0.78rem; font-weight: 600; cursor: pointer; color: var(--ink2); white-space: nowrap; transition: all 0.15s; }
     .save-btn:hover { border-color: var(--green); color: var(--green); }
-    .save-btn.saved { border-color: var(--green); color: var(--green); background: #EAF4EE; }
+    .save-btn.saved { border-color: var(--green); color: var(--green); background: var(--green2); }
+    .add-plan-btn { padding: 8px 14px; border: 1.5px solid var(--border); border-radius: 8px; background: transparent; font-size: 0.78rem; font-weight: 600; cursor: pointer; color: var(--ink2); white-space: nowrap; transition: all 0.15s; }
+    .add-plan-btn:hover { border-color: var(--blue); color: var(--blue); background: var(--blue2); }
 
     /* ── Meta Row ── */
-    .recipe-meta {
-      display: flex;
-      gap: 0;
-      border-bottom: 1px solid var(--border);
-    }
-    .meta-item {
-      flex: 1;
-      padding: 14px 20px;
-      text-align: center;
-      border-right: 1px solid var(--border);
-    }
+    .recipe-meta { display: flex; gap: 0; border-bottom: 1px solid var(--border); }
+    .meta-item { flex: 1; padding: 12px 18px; text-align: center; border-right: 1px solid var(--border); }
     .meta-item:last-child { border-right: none; }
-    .meta-label {
-      font-size: 0.65rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--ink3);
-      margin-bottom: 2px;
-    }
-    .meta-value {
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: var(--ink);
-    }
+    .meta-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink3); margin-bottom: 2px; }
+    .meta-value { font-size: 0.92rem; font-weight: 600; color: var(--ink); }
 
     /* ── Macros Grid ── */
-    .macros-section { padding: 24px 30px; border-bottom: 1px solid var(--border); }
-    .macros-title {
-      font-size: 0.68rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--ink3);
-      margin-bottom: 14px;
-    }
-    .macros-grid {
-      display: grid;
-      grid-template-columns: 2fr 1fr 1fr 1fr;
-      gap: 10px;
-    }
-    .macro-box {
-      border-radius: 10px;
-      padding: 16px 14px;
-      text-align: center;
-      background: var(--cream2);
-    }
-    .macro-box.hero {
-      background: var(--accent);
-      color: #fff;
-    }
-    .macro-num {
-      font-family: var(--serif);
-      font-size: 2rem;
-      font-weight: 400;
-      line-height: 1;
-      margin-bottom: 4px;
-    }
-    .macro-box.hero .macro-num { font-size: 2.6rem; }
-    .macro-unit { font-size: 0.7rem; }
-    .macro-name {
-      font-size: 0.65rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-top: 4px;
-      opacity: 0.75;
-    }
+    .macros-section { padding: 20px 28px; border-bottom: 1px solid var(--border); }
+    .macros-title { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink3); margin-bottom: 12px; }
+    .macros-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 8px; }
+    .macro-box { border-radius: 10px; padding: 14px 12px; text-align: center; background: var(--cream2); }
+    .macro-box.hero { background: var(--accent); color: #fff; }
+    .macro-num { font-family: var(--serif); font-size: 1.8rem; font-weight: 400; line-height: 1; margin-bottom: 3px; }
+    .macro-box.hero .macro-num { font-size: 2.3rem; }
+    .macro-unit { font-size: 0.67rem; }
+    .macro-name { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 3px; opacity: 0.75; }
     .macro-box.hero .macro-name { opacity: 0.9; font-weight: 600; }
 
     /* ── Ingredients & Steps ── */
-    .recipe-body {
-      display: grid;
-      grid-template-columns: 1fr 1.5fr;
-      gap: 0;
-    }
-    @media (max-width: 560px) { .recipe-body { grid-template-columns: 1fr; } }
-
-    .ingredients-section {
-      padding: 24px 24px 28px 30px;
-      border-right: 1px solid var(--border);
-    }
-    @media (max-width: 560px) {
-      .ingredients-section { border-right: none; border-bottom: 1px solid var(--border); }
-    }
-    .steps-section { padding: 24px 30px 28px 24px; }
-
-    .section-title {
-      font-size: 0.68rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--ink3);
-      margin-bottom: 14px;
-    }
+    .recipe-body { display: grid; grid-template-columns: 1fr 1.5fr; gap: 0; }
+    @media (max-width: 540px) { .recipe-body { grid-template-columns: 1fr; } }
+    .ingredients-section { padding: 22px 22px 26px 28px; border-right: 1px solid var(--border); }
+    @media (max-width: 540px) { .ingredients-section { border-right: none; border-bottom: 1px solid var(--border); } }
+    .steps-section { padding: 22px 28px 26px 22px; }
+    .section-title { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink3); margin-bottom: 12px; }
 
     .ingredients-list { list-style: none; }
-    .ingredients-list li {
-      display: flex;
-      gap: 10px;
-      padding: 7px 0;
-      border-bottom: 1px solid var(--cream2);
-      font-size: 0.88rem;
-      line-height: 1.4;
-    }
+    .ingredients-list li { display: flex; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--cream2); font-size: 0.86rem; line-height: 1.4; }
     .ingredients-list li:last-child { border-bottom: none; }
-    .ing-amount {
-      font-weight: 600;
-      color: var(--ink);
-      min-width: 60px;
-      flex-shrink: 0;
-    }
+    .ing-amount { font-weight: 600; color: var(--ink); min-width: 58px; flex-shrink: 0; }
     .ing-item { color: var(--ink2); }
 
     .steps-list { list-style: none; counter-reset: step-counter; }
-    .steps-list li {
-      counter-increment: step-counter;
-      display: flex;
-      gap: 14px;
-      margin-bottom: 16px;
-      font-size: 0.88rem;
-      line-height: 1.55;
-      color: var(--ink2);
-    }
-    .steps-list li::before {
-      content: counter(step-counter);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 22px;
-      height: 22px;
-      min-width: 22px;
-      border-radius: 50%;
-      background: var(--ink);
-      color: var(--cream);
-      font-size: 0.7rem;
-      font-weight: 700;
-      margin-top: 2px;
-    }
+    .steps-list li { counter-increment: step-counter; display: flex; gap: 12px; margin-bottom: 14px; font-size: 0.86rem; line-height: 1.55; color: var(--ink2); }
+    .steps-list li::before { content: counter(step-counter); display: flex; align-items: center; justify-content: center; width: 21px; height: 21px; min-width: 21px; border-radius: 50%; background: var(--ink); color: var(--cream); font-size: 0.67rem; font-weight: 700; margin-top: 2px; }
 
-    /* ── Tags ── */
-    .tags-row {
-      padding: 16px 30px;
-      border-top: 1px solid var(--border);
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-    .tag {
-      padding: 4px 10px;
-      border-radius: 999px;
-      background: var(--cream2);
-      font-size: 0.72rem;
-      color: var(--ink2);
-      border: 1px solid var(--border);
-    }
+    .tags-row { padding: 14px 28px; border-top: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag { padding: 4px 10px; border-radius: 999px; background: var(--cream2); font-size: 0.7rem; color: var(--ink2); border: 1px solid var(--border); }
 
     /* ── Saved Recipes ── */
-    .saved-section { margin-top: 48px; }
-    .saved-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 20px;
-    }
-    .saved-heading {
-      font-family: var(--serif);
-      font-size: 1.25rem;
-      font-weight: 400;
-    }
-    .clear-btn {
-      font-size: 0.75rem;
-      color: var(--ink3);
-      background: none;
-      border: none;
-      cursor: pointer;
-      text-decoration: underline;
-    }
+    .saved-section { margin-top: 40px; }
+    .saved-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px; }
+    .saved-heading { font-family: var(--serif); font-size: 1.2rem; font-weight: 400; }
+    .clear-btn { font-size: 0.73rem; color: var(--ink3); background: none; border: none; cursor: pointer; text-decoration: underline; }
     .clear-btn:hover { color: var(--accent); }
-
-    .saved-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
-    .saved-card {
-      background: #fff;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      padding: 16px;
-      cursor: pointer;
-      transition: border-color 0.15s;
-    }
+    .saved-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
+    .saved-card { background: #fff; border: 1.5px solid var(--border); border-radius: 10px; padding: 14px; cursor: pointer; transition: border-color 0.15s; }
     .saved-card:hover { border-color: var(--accent); }
-    .saved-card-name {
-      font-family: var(--serif);
-      font-size: 1rem;
-      margin-bottom: 6px;
-      color: var(--ink);
-    }
-    .saved-card-protein {
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: var(--accent);
-    }
-    .saved-card-meta { font-size: 0.75rem; color: var(--ink3); margin-top: 4px; }
+    .saved-card-name { font-family: var(--serif); font-size: 0.97rem; margin-bottom: 5px; color: var(--ink); }
+    .saved-card-protein { font-size: 0.76rem; font-weight: 700; color: var(--accent); }
+    .saved-card-meta { font-size: 0.73rem; color: var(--ink3); margin-top: 3px; }
+    .empty-saved { color: var(--ink3); font-size: 0.87rem; font-style: italic; }
 
-    .empty-saved {
-      color: var(--ink3);
-      font-size: 0.88rem;
-      font-style: italic;
+    /* ── Meal Plan Tab ── */
+    .plan-summary {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 22px;
     }
+    @media (max-width: 500px) { .plan-summary { grid-template-columns: repeat(2, 1fr); } }
+
+    .plan-macro {
+      background: #fff; border: 1.5px solid var(--border); border-radius: 10px;
+      padding: 14px 12px; text-align: center;
+    }
+    .plan-macro-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink3); margin-bottom: 6px; }
+    .plan-macro-val { font-family: var(--serif); font-size: 1.5rem; color: var(--ink); line-height: 1; }
+    .plan-macro-val span { font-family: var(--sans); font-size: 0.75rem; color: var(--ink3); }
+    .plan-macro-bar { height: 4px; border-radius: 2px; background: var(--cream2); margin-top: 8px; overflow: hidden; }
+    .plan-macro-fill { height: 100%; border-radius: 2px; background: var(--accent); transition: width 0.4s ease; }
+    .plan-macro-fill.over { background: #C0392B; }
+    .plan-macro.protein-macro .plan-macro-fill { background: var(--accent); }
+
+    .meals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 28px; }
+    @media (max-width: 560px) { .meals-grid { grid-template-columns: 1fr; } }
+
+    .meal-slot {
+      background: #fff; border: 1.5px solid var(--border); border-radius: 12px;
+      overflow: hidden; transition: border-color 0.15s;
+    }
+    .meal-slot-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px; border-bottom: 1px solid var(--border);
+      background: var(--cream);
+    }
+    .meal-slot-name { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; color: var(--ink3); }
+    .meal-slot-actions { display: flex; gap: 6px; }
+    .slot-gen-btn {
+      padding: 4px 10px; border: 1px solid var(--border); border-radius: 6px;
+      background: #fff; font-size: 0.7rem; font-weight: 500; cursor: pointer;
+      color: var(--ink2); transition: all 0.15s;
+    }
+    .slot-gen-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent2); }
+    .slot-remove-btn {
+      padding: 4px 8px; border: 1px solid var(--border); border-radius: 6px;
+      background: #fff; font-size: 0.7rem; cursor: pointer; color: var(--ink3);
+      transition: all 0.15s; display: none;
+    }
+    .slot-remove-btn:hover { border-color: #C0392B; color: #C0392B; }
+    .slot-remove-btn.visible { display: block; }
+
+    .meal-slot-body { padding: 14px 16px; min-height: 80px; }
+    .meal-empty { color: var(--ink3); font-size: 0.82rem; font-style: italic; }
+    .meal-recipe-name { font-family: var(--serif); font-size: 1rem; color: var(--ink); margin-bottom: 4px; }
+    .meal-recipe-macros { display: flex; gap: 10px; flex-wrap: wrap; }
+    .meal-macro-tag {
+      font-size: 0.72rem; font-weight: 600; padding: 2px 8px;
+      border-radius: 999px; background: var(--cream2); color: var(--ink2);
+    }
+    .meal-macro-tag.protein { background: var(--accent2); color: var(--accent); }
+
+    /* ── Modal (slot generation) ── */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
+    .modal-overlay.visible { display: flex; }
+    .modal { background: #fff; border-radius: 14px; padding: 28px; max-width: 480px; width: 100%; max-height: 90vh; overflow-y: auto; animation: slideUp 0.25s ease; }
+    .modal-title { font-family: var(--serif); font-size: 1.4rem; margin-bottom: 6px; }
+    .modal-sub { font-size: 0.84rem; color: var(--ink3); margin-bottom: 20px; }
+    .modal-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink3); font-weight: 600; margin-bottom: 6px; }
+    .modal-input { width: 100%; padding: 10px 13px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.93rem; font-family: var(--sans); color: var(--ink); outline: none; margin-bottom: 16px; }
+    .modal-input:focus { border-color: var(--accent); }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+    .modal-cancel { padding: 9px 16px; border: 1.5px solid var(--border); border-radius: 8px; background: transparent; font-size: 0.85rem; cursor: pointer; color: var(--ink2); }
+    .modal-cancel:hover { background: var(--cream2); }
+    .modal-gen { padding: 9px 18px; border: none; border-radius: 8px; background: var(--ink); color: var(--cream); font-size: 0.85rem; font-weight: 600; cursor: pointer; }
+    .modal-gen:hover { background: var(--accent); }
+    .modal-gen:disabled { opacity: 0.5; cursor: not-allowed; }
+    .modal-status { font-size: 0.82rem; color: var(--ink3); margin-bottom: 12px; display: none; }
+    .modal-status.visible { display: block; }
+
+    /* ── Misc ── */
+    .separator { height: 1px; background: var(--border); margin: 24px 0; }
+    .top-controls { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; padding-top: 4px; }
   </style>
 </head>
 <body>
@@ -490,290 +354,518 @@
   <header class="site-header">
     <div>
       <div class="logo">Macro<span>.</span></div>
-      <div class="tagline">High-protein recipes, on demand</div>
+      <div class="tagline">Smart recipe finder — hit your macros every meal</div>
+    </div>
+    <div class="api-row">
+      <label for="apiKeyInput">API Key</label>
+      <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-…" autocomplete="off" />
+      <button class="api-save-btn" onclick="saveApiKey()">Save</button>
     </div>
   </header>
 
-  <!-- API Key Row -->
-  <div class="api-row">
-    <label for="apiKeyInput">Anthropic API Key</label>
-    <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-…" autocomplete="off" />
-    <button class="api-save-btn" onclick="saveApiKey()">Save</button>
-  </div>
-
   <!-- Demo Banner -->
-  <div class="demo-banner" id="demoBanner">
+  <div class="demo-banner" id="demoBanner" style="margin-top:14px">
     <span>✦</span>
-    <span><strong>Demo mode</strong> — no API key needed. Enter anything below to see a sample recipe. Add your own key above to generate real AI recipes.</span>
+    <span><strong>Demo mode</strong> — add your Anthropic API key above for real AI-generated recipes. Demo cycles through sample recipes for free.</span>
   </div>
 
-  <!-- Craving Input -->
-  <section class="craving-section">
-    <div class="craving-label">What are you craving?</div>
-    <div class="craving-row">
-      <input
-        type="text"
-        class="craving-input"
-        id="cravingInput"
-        placeholder="e.g. smoky grilled chicken with a kick…"
-        onkeydown="if(event.key==='Enter') generate()"
-      />
-      <button class="generate-btn" id="generateBtn" onclick="generate()">Generate</button>
-    </div>
-    <div class="chips" id="chips">
-      <div class="chip" onclick="fillChip('smoky and warming')">smoky and warming</div>
-      <div class="chip" onclick="fillChip('spicy Asian-inspired')">spicy Asian-inspired</div>
-      <div class="chip" onclick="fillChip('creamy pasta with a protein punch')">creamy pasta, protein punch</div>
-      <div class="chip" onclick="fillChip('quick weeknight stir-fry')">quick weeknight stir-fry</div>
-      <div class="chip" onclick="fillChip('hearty Mexican bowl')">hearty Mexican bowl</div>
-      <div class="chip" onclick="fillChip('Mediterranean grilled fish')">Mediterranean grilled fish</div>
-    </div>
-  </section>
+  <!-- Tab Nav -->
+  <nav class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('find')">Find a Recipe</button>
+    <button class="tab-btn" onclick="switchTab('plan')">Meal Plan</button>
+  </nav>
 
-  <!-- Status / Error -->
-  <div class="status-bar" id="statusBar">
-    <div class="spinner" id="spinner"></div>
-    <span id="statusText">Generating your recipe…</span>
+  <!-- ═══════════════════════════════════════════
+       TAB 1: FIND A RECIPE
+       ═══════════════════════════════════════════ -->
+  <div class="tab-panel active" id="tab-find">
+
+    <!-- Macro Targets -->
+    <div class="card">
+      <div class="card-title">Macro Targets (per meal)</div>
+      <div class="preset-row">
+        <button class="preset-btn active" onclick="applyPreset('fat-loss')">Fat Loss</button>
+        <button class="preset-btn" onclick="applyPreset('muscle-gain')">Muscle Gain</button>
+        <button class="preset-btn" onclick="applyPreset('maintenance')">Maintenance</button>
+        <button class="preset-btn" onclick="applyPreset('custom')">Custom</button>
+      </div>
+      <div class="macro-inputs">
+        <div class="macro-input-group">
+          <label>Calories</label>
+          <input type="number" id="targetCalories" value="500" min="100" max="2000" oninput="onManualTarget()" />
+          <div class="unit">kcal</div>
+        </div>
+        <div class="macro-input-group">
+          <label>Protein</label>
+          <input type="number" id="targetProtein" value="45" min="0" max="300" oninput="onManualTarget()" />
+          <div class="unit">grams</div>
+        </div>
+        <div class="macro-input-group">
+          <label>Carbs</label>
+          <input type="number" id="targetCarbs" value="40" min="0" max="400" oninput="onManualTarget()" />
+          <div class="unit">grams</div>
+        </div>
+        <div class="macro-input-group">
+          <label>Fat</label>
+          <input type="number" id="targetFat" value="15" min="0" max="200" oninput="onManualTarget()" />
+          <div class="unit">grams</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dietary Preferences -->
+    <div class="card">
+      <div class="card-title">Dietary Preferences <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.75rem;color:var(--ink3)">— select all that apply</span></div>
+      <div class="chips" id="dietChips">
+        <div class="chip" data-diet="high-protein" onclick="toggleDiet(this)">High-protein</div>
+        <div class="chip" data-diet="low-carb" onclick="toggleDiet(this)">Low-carb</div>
+        <div class="chip" data-diet="keto" onclick="toggleDiet(this)">Keto</div>
+        <div class="chip" data-diet="vegan" onclick="toggleDiet(this)">Vegan</div>
+        <div class="chip" data-diet="vegetarian" onclick="toggleDiet(this)">Vegetarian</div>
+        <div class="chip" data-diet="gluten-free" onclick="toggleDiet(this)">Gluten-free</div>
+        <div class="chip" data-diet="dairy-free" onclick="toggleDiet(this)">Dairy-free</div>
+        <div class="chip" data-diet="paleo" onclick="toggleDiet(this)">Paleo</div>
+        <div class="chip" data-diet="quick (under 30 mins)" onclick="toggleDiet(this)">Quick (&lt;30 min)</div>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="card">
+      <div class="card-title">Recipe Search</div>
+      <div class="search-mode-row">
+        <button class="mode-btn active" id="modeCreaving" onclick="setMode('craving')">By Craving</button>
+        <button class="mode-btn" id="modeIngredients" onclick="setMode('ingredients')">By Ingredients</button>
+      </div>
+
+      <div id="cravingPanel">
+        <div class="craving-label">What are you craving?</div>
+        <div class="search-row">
+          <input type="text" class="craving-input" id="cravingInput" placeholder="e.g. smoky grilled chicken with a kick…" onkeydown="if(event.key==='Enter') generate()" />
+          <button class="generate-btn" id="generateBtn" onclick="generate()">Generate</button>
+        </div>
+        <div class="suggestion-chips">
+          <div class="suggestion-chip" onclick="fillChip('smoky and warming')">smoky and warming</div>
+          <div class="suggestion-chip" onclick="fillChip('spicy Asian-inspired')">spicy Asian-inspired</div>
+          <div class="suggestion-chip" onclick="fillChip('creamy pasta with a protein punch')">creamy pasta, protein punch</div>
+          <div class="suggestion-chip" onclick="fillChip('quick weeknight stir-fry')">quick weeknight stir-fry</div>
+          <div class="suggestion-chip" onclick="fillChip('hearty Mexican bowl')">hearty Mexican bowl</div>
+          <div class="suggestion-chip" onclick="fillChip('Mediterranean grilled fish')">Mediterranean grilled fish</div>
+        </div>
+      </div>
+
+      <div id="ingredientsPanel" style="display:none">
+        <div class="craving-label">What's in your fridge?</div>
+        <textarea class="ingredient-area" id="ingredientsInput" placeholder="e.g. chicken breast, spinach, garlic, cherry tomatoes, feta…&#10;&#10;List whatever you have and we'll build a recipe around it."></textarea>
+        <div class="search-row" style="margin-top:10px">
+          <div style="flex:1"></div>
+          <button class="generate-btn" id="generateBtn2" onclick="generate()">Generate</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status / Error -->
+    <div class="status-bar" id="statusBar">
+      <div class="spinner" id="spinner"></div>
+      <span id="statusText">Generating your recipe…</span>
+    </div>
+
+    <!-- Recipe Card -->
+    <div class="recipe-card" id="recipeCard">
+      <div class="recipe-header">
+        <div class="recipe-title-block">
+          <div class="recipe-name" id="recipeName"></div>
+          <div class="recipe-desc" id="recipeDesc"></div>
+        </div>
+        <div class="recipe-actions">
+          <button class="add-plan-btn" onclick="addCurrentToPlan()">+ Add to Plan</button>
+          <button class="save-btn" id="saveBtn" onclick="saveCurrentRecipe()">Save</button>
+        </div>
+      </div>
+
+      <div class="recipe-meta">
+        <div class="meta-item"><div class="meta-label">Prep</div><div class="meta-value" id="prepTime"></div></div>
+        <div class="meta-item"><div class="meta-label">Cook</div><div class="meta-value" id="cookTime"></div></div>
+        <div class="meta-item"><div class="meta-label">Servings</div><div class="meta-value" id="servings"></div></div>
+      </div>
+
+      <div class="macros-section">
+        <div class="macros-title">Macros per serving</div>
+        <div class="macros-grid">
+          <div class="macro-box hero">
+            <div class="macro-num" id="macroProtein">—</div>
+            <div class="macro-unit">grams</div>
+            <div class="macro-name">Protein</div>
+          </div>
+          <div class="macro-box">
+            <div class="macro-num" id="macroCalories">—</div>
+            <div class="macro-unit">kcal</div>
+            <div class="macro-name">Calories</div>
+          </div>
+          <div class="macro-box">
+            <div class="macro-num" id="macroCarbs">—</div>
+            <div class="macro-unit">grams</div>
+            <div class="macro-name">Carbs</div>
+          </div>
+          <div class="macro-box">
+            <div class="macro-num" id="macroFat">—</div>
+            <div class="macro-unit">grams</div>
+            <div class="macro-name">Fat</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="recipe-body">
+        <div class="ingredients-section">
+          <div class="section-title">Ingredients</div>
+          <ul class="ingredients-list" id="ingredientsList"></ul>
+        </div>
+        <div class="steps-section">
+          <div class="section-title">Method</div>
+          <ol class="steps-list" id="stepsList"></ol>
+        </div>
+      </div>
+
+      <div class="tags-row" id="tagsRow"></div>
+    </div>
+
+    <!-- Saved Recipes -->
+    <section class="saved-section" id="savedSection" style="display:none">
+      <div class="saved-header">
+        <div class="saved-heading">Saved Recipes</div>
+        <button class="clear-btn" onclick="clearSaved()">Clear all</button>
+      </div>
+      <div class="saved-grid" id="savedGrid"></div>
+    </section>
+
+  </div><!-- /tab-find -->
+
+  <!-- ═══════════════════════════════════════════
+       TAB 2: MEAL PLAN
+       ═══════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-plan">
+
+    <!-- Daily macro summary -->
+    <div class="plan-summary" id="planSummary">
+      <div class="plan-macro protein-macro">
+        <div class="plan-macro-label">Protein</div>
+        <div class="plan-macro-val" id="planProteinVal">0 <span>/ <span id="planProteinTarget">—</span>g</span></div>
+        <div class="plan-macro-bar"><div class="plan-macro-fill" id="planProteinBar" style="width:0%"></div></div>
+      </div>
+      <div class="plan-macro">
+        <div class="plan-macro-label">Calories</div>
+        <div class="plan-macro-val" id="planCalVal">0 <span>/ <span id="planCalTarget">—</span></span></div>
+        <div class="plan-macro-bar"><div class="plan-macro-fill" id="planCalBar" style="width:0%;background:var(--blue)"></div></div>
+      </div>
+      <div class="plan-macro">
+        <div class="plan-macro-label">Carbs</div>
+        <div class="plan-macro-val" id="planCarbVal">0 <span>/ <span id="planCarbTarget">—</span>g</span></div>
+        <div class="plan-macro-bar"><div class="plan-macro-fill" id="planCarbBar" style="width:0%;background:#7C3AED"></div></div>
+      </div>
+      <div class="plan-macro">
+        <div class="plan-macro-label">Fat</div>
+        <div class="plan-macro-val" id="planFatVal">0 <span>/ <span id="planFatTarget">—</span>g</span></div>
+        <div class="plan-macro-bar"><div class="plan-macro-fill" id="planFatBar" style="width:0%;background:#0891B2"></div></div>
+      </div>
+    </div>
+
+    <!-- Meal slots -->
+    <div class="meals-grid" id="mealsGrid"></div>
+
+    <p style="font-size:0.8rem;color:var(--ink3);text-align:center">
+      Targets are the full-day totals from your macro settings × number of meals &nbsp;·&nbsp; Click <strong>Generate</strong> in any slot to create a fitting recipe
+    </p>
+
+  </div><!-- /tab-plan -->
+
+</div><!-- /page -->
+
+<!-- Slot Generation Modal -->
+<div class="modal-overlay" id="slotModal">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">Generate meal</div>
+    <div class="modal-sub" id="modalSub">Remaining macros will guide the recipe.</div>
+    <div class="modal-label">What are you in the mood for? (optional)</div>
+    <input type="text" class="modal-input" id="modalCraving" placeholder="e.g. something light and fresh…" onkeydown="if(event.key==='Enter') generateForSlot()" />
+    <div class="modal-status" id="modalStatus"><span class="spinner" style="display:inline-block;vertical-align:middle;margin-right:8px"></span> Generating…</div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+      <button class="modal-gen" id="modalGenBtn" onclick="generateForSlot()">Generate Recipe</button>
+    </div>
   </div>
-
-  <!-- Recipe Card -->
-  <div class="recipe-card" id="recipeCard">
-    <div class="recipe-header">
-      <div class="recipe-title-block">
-        <div class="recipe-name" id="recipeName"></div>
-        <div class="recipe-desc" id="recipeDesc"></div>
-      </div>
-      <button class="save-btn" id="saveBtn" onclick="saveCurrentRecipe()">Save Recipe</button>
-    </div>
-
-    <div class="recipe-meta">
-      <div class="meta-item">
-        <div class="meta-label">Prep</div>
-        <div class="meta-value" id="prepTime"></div>
-      </div>
-      <div class="meta-item">
-        <div class="meta-label">Cook</div>
-        <div class="meta-value" id="cookTime"></div>
-      </div>
-      <div class="meta-item">
-        <div class="meta-label">Servings</div>
-        <div class="meta-value" id="servings"></div>
-      </div>
-    </div>
-
-    <div class="macros-section">
-      <div class="macros-title">Macros per serving</div>
-      <div class="macros-grid">
-        <div class="macro-box hero">
-          <div class="macro-num" id="macroProtein">—</div>
-          <div class="macro-unit">grams</div>
-          <div class="macro-name">Protein</div>
-        </div>
-        <div class="macro-box">
-          <div class="macro-num" id="macroCalories">—</div>
-          <div class="macro-unit">kcal</div>
-          <div class="macro-name">Calories</div>
-        </div>
-        <div class="macro-box">
-          <div class="macro-num" id="macroCarbs">—</div>
-          <div class="macro-unit">grams</div>
-          <div class="macro-name">Carbs</div>
-        </div>
-        <div class="macro-box">
-          <div class="macro-num" id="macroFat">—</div>
-          <div class="macro-unit">grams</div>
-          <div class="macro-name">Fat</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="recipe-body">
-      <div class="ingredients-section">
-        <div class="section-title">Ingredients</div>
-        <ul class="ingredients-list" id="ingredientsList"></ul>
-      </div>
-      <div class="steps-section">
-        <div class="section-title">Method</div>
-        <ol class="steps-list" id="stepsList"></ol>
-      </div>
-    </div>
-
-    <div class="tags-row" id="tagsRow"></div>
-  </div>
-
-  <!-- Saved Recipes -->
-  <section class="saved-section" id="savedSection" style="display:none">
-    <div class="saved-header">
-      <div class="saved-heading">Saved Recipes</div>
-      <button class="clear-btn" onclick="clearSaved()">Clear all</button>
-    </div>
-    <div class="saved-grid" id="savedGrid"></div>
-  </section>
-
 </div>
 
 <script>
-  /* ── State ── */
-  let currentRecipe = null;
+/* ═══════════════════════════════════════════════════════
+   STATE
+   ═══════════════════════════════════════════════════════ */
+let currentRecipe = null;
+let activePreset  = 'fat-loss';
+let searchMode    = 'craving';     // 'craving' | 'ingredients'
+let activeDiets   = new Set();
+let activeSlot    = null;          // index 0-4 for modal
 
-  /* ── API Key persistence ── */
-  const apiKeyInput = document.getElementById('apiKeyInput');
-  const saved = localStorage.getItem('macro_api_key');
-  if (saved) apiKeyInput.value = saved;
+const MEAL_SLOTS = ['Breakfast', 'Snack 1', 'Lunch', 'Snack 2', 'Dinner'];
+let mealPlan = Array(5).fill(null);  // recipe or null per slot
 
-  function saveApiKey() {
-    const key = apiKeyInput.value.trim();
-    if (!key) return;
-    localStorage.setItem('macro_api_key', key);
-    const btn = document.querySelector('.api-save-btn');
-    btn.textContent = 'Saved ✓';
-    setTimeout(() => btn.textContent = 'Save', 1800);
+/* ═══════════════════════════════════════════════════════
+   PRESETS
+   ═══════════════════════════════════════════════════════ */
+const PRESETS = {
+  'fat-loss':     { calories: 500,  protein: 45, carbs: 40,  fat: 15 },
+  'muscle-gain':  { calories: 700,  protein: 55, carbs: 80,  fat: 22 },
+  'maintenance':  { calories: 550,  protein: 40, carbs: 55,  fat: 18 },
+};
+
+function applyPreset(name) {
+  activePreset = name;
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  if (name !== 'custom') {
+    const p = PRESETS[name];
+    document.getElementById('targetCalories').value = p.calories;
+    document.getElementById('targetProtein').value  = p.protein;
+    document.getElementById('targetCarbs').value    = p.carbs;
+    document.getElementById('targetFat').value      = p.fat;
   }
+  updatePlanTargets();
+}
 
-  /* ── Chip fill ── */
-  function fillChip(text) {
-    document.getElementById('cravingInput').value = text;
-    document.getElementById('cravingInput').focus();
-  }
+function onManualTarget() {
+  activePreset = 'custom';
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.preset-btn')[3].classList.add('active');
+  updatePlanTargets();
+}
 
-  /* ── Status helpers ── */
-  function showLoading(msg = 'Generating your recipe…') {
-    const bar = document.getElementById('statusBar');
-    bar.className = 'status-bar loading';
-    document.getElementById('spinner').style.display = '';
-    document.getElementById('statusText').textContent = msg;
-  }
-  function showError(msg) {
-    const bar = document.getElementById('statusBar');
-    bar.className = 'status-bar error';
-    document.getElementById('spinner').style.display = 'none';
-    document.getElementById('statusText').textContent = msg;
-  }
-  function hideStatus() {
-    document.getElementById('statusBar').className = 'status-bar';
-  }
+function getTargets() {
+  return {
+    calories: parseInt(document.getElementById('targetCalories').value) || 0,
+    protein:  parseInt(document.getElementById('targetProtein').value)  || 0,
+    carbs:    parseInt(document.getElementById('targetCarbs').value)    || 0,
+    fat:      parseInt(document.getElementById('targetFat').value)      || 0,
+  };
+}
 
-  /* ── Demo mode ── */
-  const DEMO_RECIPES = [
-    {
-      name: "Smoky Chipotle Chicken Bowl",
-      description: "Juicy chicken thighs charred with chipotle and smoked paprika, piled over cilantro-lime rice with pickled jalapeños and avocado crema. Bold, smoky heat balanced with cool creaminess.",
-      prepTime: "12 mins", cookTime: "20 mins", servings: 2,
-      ingredients: [
-        { amount: "400g", item: "boneless chicken thighs" },
-        { amount: "1 tbsp", item: "chipotle paste" },
-        { amount: "1 tsp", item: "smoked paprika" },
-        { amount: "200g", item: "cooked brown rice" },
-        { amount: "1", item: "avocado" },
-        { amount: "2 tbsp", item: "Greek yoghurt" },
-        { amount: "1 handful", item: "fresh cilantro" },
-        { amount: "2 tbsp", item: "pickled jalapeños" },
-        { amount: "1", item: "lime, juiced" },
-      ],
-      steps: [
-        "Coat chicken in chipotle paste, smoked paprika, salt and a drizzle of olive oil.",
-        "Heat a cast-iron pan over high heat. Cook chicken 6–7 mins per side until charred and cooked through. Rest 5 mins, then slice.",
-        "Blend avocado with Greek yoghurt, lime juice and a pinch of salt to make crema.",
-        "Fluff rice with cilantro and lime zest. Divide into bowls.",
-        "Top with sliced chicken, avocado crema and pickled jalapeños. Serve immediately."
-      ],
-      macros: { calories: 520, protein: 48, carbs: 38, fat: 18 },
-      tags: ["high-protein", "smoky", "Mexican", "gluten-free"]
-    },
-    {
-      name: "Spicy Asian Beef & Noodles",
-      description: "Seared ground beef glazed in gochujang and soy tossed through chewy udon noodles with crispy scallions and a soft-boiled egg. Umami-rich, fiery and deeply satisfying.",
-      prepTime: "10 mins", cookTime: "15 mins", servings: 2,
-      ingredients: [
-        { amount: "350g", item: "lean ground beef (95%)" },
-        { amount: "200g", item: "udon noodles" },
-        { amount: "2 tbsp", item: "gochujang paste" },
-        { amount: "2 tbsp", item: "soy sauce" },
-        { amount: "1 tbsp", item: "sesame oil" },
-        { amount: "1 tsp", item: "fresh ginger, grated" },
-        { amount: "2 cloves", item: "garlic, minced" },
-        { amount: "2", item: "soft-boiled eggs" },
-        { amount: "3", item: "spring onions, sliced" },
-        { amount: "1 tsp", item: "toasted sesame seeds" },
-      ],
-      steps: [
-        "Cook udon per packet instructions. Drain and rinse.",
-        "Soft-boil eggs for 6.5 mins, transfer to ice water, peel and halve.",
-        "Brown beef in a hot wok over high heat, breaking apart, until caramelized — about 5 mins.",
-        "Add garlic and ginger, cook 1 min. Add gochujang, soy and sesame oil. Toss to coat.",
-        "Add noodles to wok and toss everything together over high heat for 2 mins.",
-        "Plate and top with egg halves, spring onions and sesame seeds."
-      ],
-      macros: { calories: 590, protein: 52, carbs: 48, fat: 17 },
-      tags: ["high-protein", "spicy", "Asian", "quick"]
-    },
-    {
-      name: "Lemon-Herb Salmon with White Bean Mash",
-      description: "Pan-seared salmon with a golden crust, resting on silky white bean mash with roasted garlic and fresh dill. Bright, herbaceous and loaded with protein from both fish and legumes.",
-      prepTime: "10 mins", cookTime: "18 mins", servings: 2,
-      ingredients: [
-        { amount: "2 × 180g", item: "salmon fillets, skin-on" },
-        { amount: "1 can (400g)", item: "cannellini beans, drained" },
-        { amount: "3 cloves", item: "garlic" },
-        { amount: "2 tbsp", item: "olive oil" },
-        { amount: "1", item: "lemon, zest and juice" },
-        { amount: "2 tbsp", item: "fresh dill, chopped" },
-        { amount: "2 tbsp", item: "fresh parsley, chopped" },
-        { amount: "60ml", item: "low-sodium chicken stock" },
-        { amount: "1 tsp", item: "capers" },
-      ],
-      steps: [
-        "Smash garlic and sauté in 1 tbsp olive oil until golden. Add beans and stock, simmer 5 mins.",
-        "Mash beans roughly with a fork, stir in lemon zest and half the herbs. Season well.",
-        "Pat salmon dry and season with salt and pepper.",
-        "Heat remaining oil in a non-stick pan over high heat. Place salmon skin-side down, press gently, cook 4 mins. Flip, cook 2 more mins.",
-        "Serve salmon over bean mash. Squeeze lemon over top, scatter capers and remaining herbs."
-      ],
-      macros: { calories: 490, protein: 46, carbs: 28, fat: 20 },
-      tags: ["high-protein", "Mediterranean", "omega-3", "gluten-free"]
-    },
-  ];
+/* ═══════════════════════════════════════════════════════
+   DIETARY PREFS
+   ═══════════════════════════════════════════════════════ */
+function toggleDiet(el) {
+  const d = el.dataset.diet;
+  if (activeDiets.has(d)) { activeDiets.delete(d); el.classList.remove('active'); }
+  else                     { activeDiets.add(d);    el.classList.add('active'); }
+}
 
-  let demoIndex = 0;
+/* ═══════════════════════════════════════════════════════
+   TAB SWITCHING
+   ═══════════════════════════════════════════════════════ */
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    const panels = ['find', 'plan'];
+    b.classList.toggle('active', panels[i] === name);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'plan') renderMealPlan();
+}
 
-  function updateDemoBanner() {
-    const key = apiKeyInput.value.trim() || localStorage.getItem('macro_api_key') || '';
-    document.getElementById('demoBanner').classList.toggle('hidden', !!key);
-  }
-  apiKeyInput.addEventListener('input', updateDemoBanner);
+/* ═══════════════════════════════════════════════════════
+   SEARCH MODE
+   ═══════════════════════════════════════════════════════ */
+function setMode(mode) {
+  searchMode = mode;
+  document.getElementById('modeCreaving').classList.toggle('active', mode === 'craving');
+  document.getElementById('modeIngredients').classList.toggle('active', mode === 'ingredients');
+  document.getElementById('cravingPanel').style.display    = mode === 'craving' ? '' : 'none';
+  document.getElementById('ingredientsPanel').style.display = mode === 'ingredients' ? '' : 'none';
+}
 
-  /* ── Generate ── */
-  async function generate() {
-    const craving = document.getElementById('cravingInput').value.trim();
-    const apiKey  = apiKeyInput.value.trim() || localStorage.getItem('macro_api_key') || '';
+function fillChip(text) {
+  document.getElementById('cravingInput').value = text;
+  document.getElementById('cravingInput').focus();
+}
 
-    if (!craving) {
-      document.getElementById('cravingInput').focus();
-      return;
-    }
+/* ═══════════════════════════════════════════════════════
+   STATUS HELPERS
+   ═══════════════════════════════════════════════════════ */
+function showLoading(msg) {
+  const bar = document.getElementById('statusBar');
+  bar.className = 'status-bar loading';
+  document.getElementById('spinner').style.display = '';
+  document.getElementById('statusText').textContent = msg || 'Generating your recipe…';
+}
+function showError(msg) {
+  const bar = document.getElementById('statusBar');
+  bar.className = 'status-bar error';
+  document.getElementById('spinner').style.display = 'none';
+  document.getElementById('statusText').textContent = msg;
+}
+function hideStatus() {
+  document.getElementById('statusBar').className = 'status-bar';
+}
 
-    // Demo mode — no API key needed
-    if (!apiKey) {
-      const btn = document.getElementById('generateBtn');
-      btn.disabled = true;
-      document.getElementById('recipeCard').className = 'recipe-card';
-      showLoading('Loading demo recipe…');
-      await new Promise(r => setTimeout(r, 800)); // brief fake delay
-      const recipe = DEMO_RECIPES[demoIndex % DEMO_RECIPES.length];
-      demoIndex++;
-      currentRecipe = recipe;
-      renderRecipe(recipe);
-      hideStatus();
-      btn.disabled = false;
-      return;
-    }
+/* ═══════════════════════════════════════════════════════
+   API KEY
+   ═══════════════════════════════════════════════════════ */
+const apiKeyInput = document.getElementById('apiKeyInput');
+const _savedKey   = localStorage.getItem('macro_api_key');
+if (_savedKey) apiKeyInput.value = _savedKey;
 
-    const btn = document.getElementById('generateBtn');
-    btn.disabled = true;
-    document.getElementById('recipeCard').className = 'recipe-card';
-    showLoading();
+function saveApiKey() {
+  const key = apiKeyInput.value.trim();
+  if (!key) return;
+  localStorage.setItem('macro_api_key', key);
+  const btn = document.querySelector('.api-save-btn');
+  btn.textContent = 'Saved ✓';
+  setTimeout(() => btn.textContent = 'Save', 1800);
+  updateDemoBanner();
+}
 
-    const systemPrompt = `You are a professional chef and nutritionist who creates high-protein recipes.
+function getApiKey() { return apiKeyInput.value.trim() || localStorage.getItem('macro_api_key') || ''; }
+
+function updateDemoBanner() {
+  document.getElementById('demoBanner').classList.toggle('hidden', !!getApiKey());
+}
+apiKeyInput.addEventListener('input', updateDemoBanner);
+
+/* ═══════════════════════════════════════════════════════
+   DEMO RECIPES
+   ═══════════════════════════════════════════════════════ */
+const DEMO_RECIPES = [
+  {
+    name: "Smoky Chipotle Chicken Bowl",
+    description: "Juicy chicken thighs charred with chipotle and smoked paprika, piled over cilantro-lime rice with pickled jalapeños and avocado crema. Bold, smoky heat balanced with cool creaminess.",
+    prepTime: "12 mins", cookTime: "20 mins", servings: 2,
+    ingredients: [
+      { amount: "400g", item: "boneless chicken thighs" },
+      { amount: "1 tbsp", item: "chipotle paste" },
+      { amount: "1 tsp", item: "smoked paprika" },
+      { amount: "200g", item: "cooked brown rice" },
+      { amount: "1", item: "avocado" },
+      { amount: "2 tbsp", item: "Greek yoghurt" },
+      { amount: "1 handful", item: "fresh cilantro" },
+      { amount: "2 tbsp", item: "pickled jalapeños" },
+      { amount: "1", item: "lime, juiced" },
+    ],
+    steps: [
+      "Coat chicken in chipotle paste, smoked paprika, salt and a drizzle of olive oil.",
+      "Heat a cast-iron pan over high heat. Cook chicken 6–7 mins per side until charred and cooked through. Rest 5 mins, then slice.",
+      "Blend avocado with Greek yoghurt, lime juice and a pinch of salt to make crema.",
+      "Fluff rice with cilantro and lime zest. Divide into bowls.",
+      "Top with sliced chicken, avocado crema and pickled jalapeños.",
+    ],
+    macros: { calories: 520, protein: 48, carbs: 38, fat: 18 },
+    tags: ["high-protein", "smoky", "Mexican", "gluten-free"]
+  },
+  {
+    name: "Spicy Asian Beef & Noodles",
+    description: "Seared ground beef glazed in gochujang and soy tossed through chewy udon noodles with crispy scallions and a soft-boiled egg. Umami-rich, fiery and deeply satisfying.",
+    prepTime: "10 mins", cookTime: "15 mins", servings: 2,
+    ingredients: [
+      { amount: "350g", item: "lean ground beef (95%)" },
+      { amount: "200g", item: "udon noodles" },
+      { amount: "2 tbsp", item: "gochujang paste" },
+      { amount: "2 tbsp", item: "soy sauce" },
+      { amount: "1 tbsp", item: "sesame oil" },
+      { amount: "1 tsp", item: "fresh ginger, grated" },
+      { amount: "2 cloves", item: "garlic, minced" },
+      { amount: "2", item: "soft-boiled eggs" },
+      { amount: "3", item: "spring onions, sliced" },
+    ],
+    steps: [
+      "Cook udon per packet instructions. Drain and rinse.",
+      "Soft-boil eggs for 6.5 mins, transfer to ice water, peel and halve.",
+      "Brown beef in a hot wok over high heat, breaking apart, until caramelized — about 5 mins.",
+      "Add garlic and ginger, cook 1 min. Add gochujang, soy and sesame oil. Toss to coat.",
+      "Add noodles to wok and toss over high heat for 2 mins.",
+      "Plate and top with egg halves, spring onions and sesame seeds.",
+    ],
+    macros: { calories: 590, protein: 52, carbs: 48, fat: 17 },
+    tags: ["high-protein", "spicy", "Asian", "quick"]
+  },
+  {
+    name: "Lemon-Herb Salmon with White Bean Mash",
+    description: "Pan-seared salmon with a golden crust, resting on silky white bean mash with roasted garlic and fresh dill. Bright, herbaceous and loaded with protein from both fish and legumes.",
+    prepTime: "10 mins", cookTime: "18 mins", servings: 2,
+    ingredients: [
+      { amount: "2 × 180g", item: "salmon fillets, skin-on" },
+      { amount: "1 can (400g)", item: "cannellini beans, drained" },
+      { amount: "3 cloves", item: "garlic" },
+      { amount: "2 tbsp", item: "olive oil" },
+      { amount: "1", item: "lemon, zest and juice" },
+      { amount: "2 tbsp", item: "fresh dill, chopped" },
+      { amount: "2 tbsp", item: "fresh parsley, chopped" },
+      { amount: "60ml", item: "low-sodium chicken stock" },
+    ],
+    steps: [
+      "Smash garlic and sauté in 1 tbsp olive oil until golden. Add beans and stock, simmer 5 mins.",
+      "Mash beans roughly with a fork, stir in lemon zest and half the herbs. Season well.",
+      "Pat salmon dry and season with salt and pepper.",
+      "Heat remaining oil in a non-stick pan over high heat. Place salmon skin-side down, press gently, cook 4 mins. Flip, cook 2 more mins.",
+      "Serve salmon over bean mash. Squeeze lemon over top, scatter remaining herbs.",
+    ],
+    macros: { calories: 490, protein: 46, carbs: 28, fat: 20 },
+    tags: ["high-protein", "Mediterranean", "omega-3", "gluten-free"]
+  },
+  {
+    name: "Greek Turkey Meatball Bowls",
+    description: "Herb-packed turkey meatballs roasted until golden, served over lemony quinoa with cucumber, kalamata olives and a creamy tzatziki drizzle. Clean eating never tasted this good.",
+    prepTime: "15 mins", cookTime: "22 mins", servings: 2,
+    ingredients: [
+      { amount: "450g", item: "ground turkey (lean)" },
+      { amount: "1 tsp", item: "dried oregano" },
+      { amount: "1 tsp", item: "garlic powder" },
+      { amount: "180g", item: "cooked quinoa" },
+      { amount: "150g", item: "Greek yoghurt" },
+      { amount: "½", item: "cucumber, grated and squeezed" },
+      { amount: "1 clove", item: "garlic, minced" },
+      { amount: "½", item: "cucumber, diced (for bowl)" },
+      { amount: "30g", item: "kalamata olives" },
+    ],
+    steps: [
+      "Preheat oven to 200°C. Mix turkey with oregano, garlic powder, salt, pepper and form into 12 meatballs.",
+      "Roast meatballs 20–22 mins until cooked through and golden.",
+      "Make tzatziki: combine yoghurt, grated cucumber, garlic, dill, lemon juice. Season.",
+      "Season quinoa with lemon zest, olive oil, salt.",
+      "Assemble bowls: quinoa base, meatballs, diced cucumber, olives. Drizzle tzatziki.",
+    ],
+    macros: { calories: 465, protein: 50, carbs: 30, fat: 14 },
+    tags: ["high-protein", "Mediterranean", "gluten-free", "meal-prep"]
+  },
+  {
+    name: "Cottage Cheese & Egg White Scramble",
+    description: "Fluffy egg whites folded through warm cottage cheese with roasted cherry tomatoes and fresh basil. A deceptively simple, incredibly protein-dense breakfast that feels indulgent.",
+    prepTime: "5 mins", cookTime: "8 mins", servings: 1,
+    ingredients: [
+      { amount: "6", item: "egg whites" },
+      { amount: "150g", item: "low-fat cottage cheese" },
+      { amount: "100g", item: "cherry tomatoes" },
+      { amount: "1 tbsp", item: "olive oil" },
+      { amount: "1 handful", item: "fresh basil" },
+      { amount: "1 slice", item: "sourdough bread (optional)" },
+    ],
+    steps: [
+      "Halve cherry tomatoes, roast in a dry pan over medium-high heat until blistered, 3–4 mins. Set aside.",
+      "Whisk egg whites with a pinch of salt.",
+      "Heat olive oil in same pan over medium-low. Add egg whites, fold gently as they set.",
+      "When almost set, fold in cottage cheese — it will melt slightly. Remove from heat.",
+      "Top with roasted tomatoes and torn basil. Serve on toast if desired.",
+    ],
+    macros: { calories: 280, protein: 38, carbs: 10, fat: 8 },
+    tags: ["high-protein", "quick", "breakfast", "low-carb"]
+  },
+];
+let demoIndex = 0;
+
+/* ═══════════════════════════════════════════════════════
+   BUILD PROMPT
+   ═══════════════════════════════════════════════════════ */
+function buildSystemPrompt() {
+  const t   = getTargets();
+  const cal = t.calories, prot = t.protein, carbs = t.carbs, fat = t.fat;
+
+  const dietList = activeDiets.size > 0 ? [...activeDiets].join(', ') : 'none specified';
+
+  return `You are a professional chef and nutritionist who creates delicious recipes tailored to specific macro targets.
 You MUST respond with ONLY valid JSON and absolutely nothing else — no markdown, no code fences, no explanation, just the raw JSON object.
 The JSON must have exactly these fields:
 {
@@ -787,168 +879,450 @@ The JSON must have exactly these fields:
   "macros": { "calories": number, "protein": number, "carbs": number, "fat": number },
   "tags": [ string ]
 }
+
+MACRO TARGETS (per serving — hit these as closely as possible):
+- Calories: ~${cal} kcal (±15%)
+- Protein:  ~${prot}g (this is the priority — do not go below ${Math.round(prot * 0.85)}g)
+- Carbs:    ~${carbs}g (±20%)
+- Fat:      ~${fat}g (±20%)
+
+DIETARY REQUIREMENTS: ${dietList}
+
 Rules:
-- Every recipe MUST have at least 35g protein per serving — this is non-negotiable
-- Be flavor-first and indulgent — never bland, never "diet food"
-- Use bold spices, umami, smoke, acid, heat — make it something people actually want to eat
-- macros must be realistic and accurate for the ingredients listed
+- The macros in your response MUST be realistic and accurate for the ingredients listed
+- Be flavor-first: bold spices, umami, smoke, acid, heat — never bland or boring
+- Satisfy both the dietary requirements AND the macro targets
 - tags should be 3-5 short descriptor tags`;
+}
 
-    const userMessage = `Create a high-protein recipe for someone craving: "${craving}". Make it exciting and delicious.`;
+function buildUserMessage(craving, ingredients, remainingMacros) {
+  if (remainingMacros) {
+    const r = remainingMacros;
+    const mood = craving ? ` The person is in the mood for: "${craving}".` : '';
+    return `Create a recipe that fits within these REMAINING daily macro budget: ~${r.calories} kcal, ~${r.protein}g protein, ~${r.carbs}g carbs, ~${r.fat}g fat.${mood} Make it exciting and delicious.`;
+  }
+  if (ingredients) {
+    return `Create a recipe using primarily these ingredients: ${ingredients}. Use all or most of them. Make it exciting and hit the macro targets.`;
+  }
+  return `Create a recipe for someone craving: "${craving}". Make it exciting, delicious, and hit the macro targets closely.`;
+}
 
-    try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type':         'application/json',
-          'x-api-key':            apiKey,
-          'anthropic-version':    '2023-06-01',
-          'anthropic-dangerous-direct-browser-ipc': 'true',
-        },
-        body: JSON.stringify({
-          model: 'claude-haiku-4-5-20251001',
-          max_tokens: 1024,
-          system: systemPrompt,
-          messages: [{ role: 'user', content: userMessage }],
-        }),
-      });
+/* ═══════════════════════════════════════════════════════
+   GENERATE (main)
+   ═══════════════════════════════════════════════════════ */
+async function generate(slotIndex, remainingMacros) {
+  const isSlot      = slotIndex !== undefined;
+  const craving     = isSlot
+    ? document.getElementById('modalCraving').value.trim()
+    : (searchMode === 'craving'
+        ? document.getElementById('cravingInput').value.trim()
+        : '');
+  const ingredients = !isSlot && searchMode === 'ingredients'
+    ? document.getElementById('ingredientsInput').value.trim()
+    : '';
+  const apiKey      = getApiKey();
 
-      if (!response.ok) {
-        const err = await response.json().catch(() => ({}));
-        throw new Error(err.error?.message || `API error ${response.status}`);
-      }
+  if (!isSlot) {
+    if (searchMode === 'craving' && !craving) {
+      document.getElementById('cravingInput').focus(); return;
+    }
+    if (searchMode === 'ingredients' && !ingredients) {
+      document.getElementById('ingredientsInput').focus(); return;
+    }
+  }
 
-      const data = await response.json();
-      const raw  = data.content?.[0]?.text || '';
-
-      // Strip any accidental markdown fences
-      const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
-      const recipe  = JSON.parse(cleaned);
-
+  /* Demo mode */
+  if (!apiKey) {
+    if (!isSlot) {
+      setBtnsDisabled(true);
+      document.getElementById('recipeCard').className = 'recipe-card';
+      showLoading('Loading demo recipe…');
+      await delay(700);
+      const recipe = DEMO_RECIPES[demoIndex % DEMO_RECIPES.length];
+      demoIndex++;
       currentRecipe = recipe;
       renderRecipe(recipe);
       hideStatus();
-    } catch (err) {
+      setBtnsDisabled(false);
+    } else {
+      document.getElementById('modalStatus').classList.add('visible');
+      document.getElementById('modalGenBtn').disabled = true;
+      await delay(700);
+      const recipe = DEMO_RECIPES[demoIndex % DEMO_RECIPES.length];
+      demoIndex++;
+      mealPlan[slotIndex] = recipe;
+      document.getElementById('modalStatus').classList.remove('visible');
+      document.getElementById('modalGenBtn').disabled = false;
+      closeModal();
+      renderMealPlan();
+    }
+    return;
+  }
+
+  /* Real API call */
+  const system  = buildSystemPrompt();
+  const userMsg = buildUserMessage(craving, ingredients, remainingMacros);
+
+  if (!isSlot) {
+    setBtnsDisabled(true);
+    document.getElementById('recipeCard').className = 'recipe-card';
+    showLoading();
+  } else {
+    document.getElementById('modalStatus').classList.add('visible');
+    document.getElementById('modalGenBtn').disabled = true;
+  }
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type':      'application/json',
+        'x-api-key':         apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-ipc': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1200,
+        system,
+        messages: [{ role: 'user', content: userMsg }],
+      }),
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.error?.message || `API error ${response.status}`);
+    }
+
+    const data    = await response.json();
+    const raw     = data.content?.[0]?.text || '';
+    const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+    const recipe  = JSON.parse(cleaned);
+
+    if (!isSlot) {
+      currentRecipe = recipe;
+      renderRecipe(recipe);
+      hideStatus();
+    } else {
+      mealPlan[slotIndex] = recipe;
+      closeModal();
+      renderMealPlan();
+    }
+  } catch (err) {
+    if (!isSlot) {
       showError('Error: ' + (err.message || 'Something went wrong. Check your API key and try again.'));
-    } finally {
-      btn.disabled = false;
+    } else {
+      alert('Error: ' + err.message);
+    }
+  } finally {
+    if (!isSlot) {
+      setBtnsDisabled(false);
+    } else {
+      document.getElementById('modalStatus').classList.remove('visible');
+      document.getElementById('modalGenBtn').disabled = false;
     }
   }
+}
 
-  /* ── Render recipe ── */
-  function renderRecipe(r) {
-    document.getElementById('recipeName').textContent    = r.name        || 'Untitled';
-    document.getElementById('recipeDesc').textContent    = r.description || '';
-    document.getElementById('prepTime').textContent      = r.prepTime    || '—';
-    document.getElementById('cookTime').textContent      = r.cookTime    || '—';
-    document.getElementById('servings').textContent      = r.servings    || '—';
-    document.getElementById('macroProtein').textContent  = r.macros?.protein  ?? '—';
-    document.getElementById('macroCalories').textContent = r.macros?.calories ?? '—';
-    document.getElementById('macroCarbs').textContent    = r.macros?.carbs    ?? '—';
-    document.getElementById('macroFat').textContent      = r.macros?.fat      ?? '—';
+function setBtnsDisabled(v) {
+  document.getElementById('generateBtn').disabled  = v;
+  document.getElementById('generateBtn2').disabled = v;
+}
 
-    // Ingredients
-    const ingList = document.getElementById('ingredientsList');
-    ingList.innerHTML = '';
-    (r.ingredients || []).forEach(ing => {
-      const li = document.createElement('li');
-      li.innerHTML = `<span class="ing-amount">${escHtml(ing.amount)}</span><span class="ing-item">${escHtml(ing.item)}</span>`;
-      ingList.appendChild(li);
-    });
+/* ═══════════════════════════════════════════════════════
+   RENDER RECIPE
+   ═══════════════════════════════════════════════════════ */
+function renderRecipe(r) {
+  document.getElementById('recipeName').textContent    = r.name        || 'Untitled';
+  document.getElementById('recipeDesc').textContent    = r.description || '';
+  document.getElementById('prepTime').textContent      = r.prepTime    || '—';
+  document.getElementById('cookTime').textContent      = r.cookTime    || '—';
+  document.getElementById('servings').textContent      = r.servings    || '—';
+  document.getElementById('macroProtein').textContent  = r.macros?.protein  ?? '—';
+  document.getElementById('macroCalories').textContent = r.macros?.calories ?? '—';
+  document.getElementById('macroCarbs').textContent    = r.macros?.carbs    ?? '—';
+  document.getElementById('macroFat').textContent      = r.macros?.fat      ?? '—';
 
-    // Steps
-    const stepsList = document.getElementById('stepsList');
-    stepsList.innerHTML = '';
-    (r.steps || []).forEach(step => {
-      const li = document.createElement('li');
-      li.textContent = step;
-      stepsList.appendChild(li);
-    });
+  const ingList = document.getElementById('ingredientsList');
+  ingList.innerHTML = '';
+  (r.ingredients || []).forEach(ing => {
+    const li = document.createElement('li');
+    li.innerHTML = `<span class="ing-amount">${esc(ing.amount)}</span><span class="ing-item">${esc(ing.item)}</span>`;
+    ingList.appendChild(li);
+  });
 
-    // Tags
-    const tagsRow = document.getElementById('tagsRow');
-    tagsRow.innerHTML = '';
-    (r.tags || []).forEach(tag => {
-      const span = document.createElement('span');
-      span.className = 'tag';
-      span.textContent = tag;
-      tagsRow.appendChild(span);
-    });
+  const stepsList = document.getElementById('stepsList');
+  stepsList.innerHTML = '';
+  (r.steps || []).forEach(step => {
+    const li = document.createElement('li');
+    li.textContent = step;
+    stepsList.appendChild(li);
+  });
 
-    // Reset save button
-    const saveBtn = document.getElementById('saveBtn');
-    saveBtn.textContent = 'Save Recipe';
-    saveBtn.className = 'save-btn';
+  const tagsRow = document.getElementById('tagsRow');
+  tagsRow.innerHTML = '';
+  (r.tags || []).forEach(tag => {
+    const span = document.createElement('span');
+    span.className = 'tag';
+    span.textContent = tag;
+    tagsRow.appendChild(span);
+  });
 
-    document.getElementById('recipeCard').className = 'recipe-card visible';
-    document.getElementById('recipeCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  const saveBtn = document.getElementById('saveBtn');
+  saveBtn.textContent = 'Save';
+  saveBtn.className = 'save-btn';
+
+  document.getElementById('recipeCard').className = 'recipe-card visible';
+  document.getElementById('recipeCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+/* ═══════════════════════════════════════════════════════
+   SAVE RECIPE
+   ═══════════════════════════════════════════════════════ */
+function saveCurrentRecipe() {
+  if (!currentRecipe) return;
+  const saved = getSavedRecipes();
+  if (!saved.some(r => r.name === currentRecipe.name)) {
+    saved.unshift({ ...currentRecipe, _savedAt: Date.now() });
+    localStorage.setItem('macro_saved_recipes', JSON.stringify(saved));
+  }
+  const btn = document.getElementById('saveBtn');
+  btn.textContent = 'Saved ✓';
+  btn.className = 'save-btn saved';
+  renderSaved();
+}
+
+function getSavedRecipes() {
+  try { return JSON.parse(localStorage.getItem('macro_saved_recipes') || '[]'); }
+  catch { return []; }
+}
+
+function renderSaved() {
+  const recipes = getSavedRecipes();
+  const section = document.getElementById('savedSection');
+  const grid    = document.getElementById('savedGrid');
+  if (!recipes.length) { section.style.display = 'none'; return; }
+  section.style.display = '';
+  grid.innerHTML = '';
+  recipes.forEach(r => {
+    const card = document.createElement('div');
+    card.className = 'saved-card';
+    card.innerHTML = `
+      <div class="saved-card-name">${esc(r.name)}</div>
+      <div class="saved-card-protein">${r.macros?.protein ?? '?'}g protein</div>
+      <div class="saved-card-meta">${esc(r.prepTime || '')} prep · ${esc(r.cookTime || '')} cook</div>
+    `;
+    card.onclick = () => { currentRecipe = r; renderRecipe(r); hideStatus(); };
+    grid.appendChild(card);
+  });
+}
+
+function clearSaved() {
+  if (!confirm('Clear all saved recipes?')) return;
+  localStorage.removeItem('macro_saved_recipes');
+  renderSaved();
+}
+
+/* ═══════════════════════════════════════════════════════
+   ADD TO MEAL PLAN
+   ═══════════════════════════════════════════════════════ */
+function addCurrentToPlan() {
+  if (!currentRecipe) return;
+  // Find first empty slot
+  const emptyIdx = mealPlan.findIndex(s => s === null);
+  const slotIdx  = emptyIdx !== -1 ? emptyIdx : 0;
+  mealPlan[slotIdx] = currentRecipe;
+  switchTab('plan');
+  renderMealPlan();
+}
+
+/* ═══════════════════════════════════════════════════════
+   MEAL PLAN
+   ═══════════════════════════════════════════════════════ */
+function getPlanTotals() {
+  return mealPlan.reduce((acc, r) => {
+    if (!r) return acc;
+    return {
+      calories: acc.calories + (r.macros?.calories || 0),
+      protein:  acc.protein  + (r.macros?.protein  || 0),
+      carbs:    acc.carbs    + (r.macros?.carbs     || 0),
+      fat:      acc.fat      + (r.macros?.fat       || 0),
+    };
+  }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
+}
+
+function getDayTargets() {
+  const t = getTargets();
+  const n = MEAL_SLOTS.length;
+  return { calories: t.calories * n, protein: t.protein * n, carbs: t.carbs * n, fat: t.fat * n };
+}
+
+function updatePlanTargets() {
+  const dt = getDayTargets();
+  document.getElementById('planProteinTarget').textContent = dt.protein;
+  document.getElementById('planCalTarget').textContent     = dt.calories;
+  document.getElementById('planCarbTarget').textContent    = dt.carbs;
+  document.getElementById('planFatTarget').textContent     = dt.fat;
+}
+
+function renderMealPlan() {
+  updatePlanTargets();
+  const totals = getPlanTotals();
+  const day    = getDayTargets();
+
+  function setPlanMacro(valId, barId, current, target) {
+    document.getElementById(valId).querySelector('span').innerHTML =
+      `/ <span>${target}</span>${valId.includes('Cal') ? '' : 'g'}`;
+
+    // Re-render the value element (simpler approach)
+    const valEl = document.getElementById(valId);
+    valEl.innerHTML = `${current} <span>/ ${target}${valId.includes('Cal') ? '' : 'g'}</span>`;
+
+    const pct = target > 0 ? Math.min((current / target) * 100, 100) : 0;
+    const bar = document.getElementById(barId);
+    bar.style.width = pct + '%';
+    bar.classList.toggle('over', current > target * 1.05);
   }
 
-  /* ── Save to localStorage ── */
-  function saveCurrentRecipe() {
-    if (!currentRecipe) return;
-    const saved = getSavedRecipes();
-    // Avoid duplicates by name
-    const exists = saved.some(r => r.name === currentRecipe.name);
-    if (!exists) {
-      saved.unshift({ ...currentRecipe, _savedAt: Date.now() });
-      localStorage.setItem('macro_saved_recipes', JSON.stringify(saved));
-    }
-    const btn = document.getElementById('saveBtn');
-    btn.textContent = 'Saved ✓';
-    btn.className = 'save-btn saved';
-    renderSaved();
+  document.getElementById('planProteinVal').innerHTML = `${totals.protein} <span>/ ${day.protein}g</span>`;
+  document.getElementById('planCalVal').innerHTML     = `${totals.calories} <span>/ ${day.calories}</span>`;
+  document.getElementById('planCarbVal').innerHTML    = `${totals.carbs} <span>/ ${day.carbs}g</span>`;
+  document.getElementById('planFatVal').innerHTML     = `${totals.fat} <span>/ ${day.fat}g</span>`;
+
+  function setBar(barId, current, target) {
+    const pct = target > 0 ? Math.min((current / target) * 100, 100) : 0;
+    const bar = document.getElementById(barId);
+    bar.style.width = pct + '%';
+    bar.classList.toggle('over', current > target * 1.05);
   }
+  setBar('planProteinBar', totals.protein,  day.protein);
+  setBar('planCalBar',     totals.calories, day.calories);
+  setBar('planCarbBar',    totals.carbs,    day.carbs);
+  setBar('planFatBar',     totals.fat,      day.fat);
 
-  function getSavedRecipes() {
-    try { return JSON.parse(localStorage.getItem('macro_saved_recipes') || '[]'); }
-    catch { return []; }
-  }
+  const grid = document.getElementById('mealsGrid');
+  grid.innerHTML = '';
 
-  function renderSaved() {
-    const recipes = getSavedRecipes();
-    const section = document.getElementById('savedSection');
-    const grid    = document.getElementById('savedGrid');
+  MEAL_SLOTS.forEach((name, i) => {
+    const recipe = mealPlan[i];
+    const slot   = document.createElement('div');
+    slot.className = 'meal-slot';
 
-    if (!recipes.length) { section.style.display = 'none'; return; }
+    const removeVisible = recipe ? 'visible' : '';
+    slot.innerHTML = `
+      <div class="meal-slot-header">
+        <div class="meal-slot-name">${name}</div>
+        <div class="meal-slot-actions">
+          <button class="slot-gen-btn" onclick="openSlotModal(${i})">Generate</button>
+          <button class="slot-remove-btn ${removeVisible}" onclick="removeFromPlan(${i})">Remove</button>
+        </div>
+      </div>
+      <div class="meal-slot-body">
+        ${recipe ? `
+          <div class="meal-recipe-name">${esc(recipe.name)}</div>
+          <div class="meal-recipe-macros">
+            <span class="meal-macro-tag protein">${recipe.macros?.protein ?? '?'}g protein</span>
+            <span class="meal-macro-tag">${recipe.macros?.calories ?? '?'} kcal</span>
+            <span class="meal-macro-tag">${recipe.macros?.carbs ?? '?'}g carbs</span>
+            <span class="meal-macro-tag">${recipe.macros?.fat ?? '?'}g fat</span>
+          </div>
+        ` : `<div class="meal-empty">No recipe added yet</div>`}
+      </div>
+    `;
 
-    section.style.display = '';
-    grid.innerHTML = '';
-    recipes.forEach((r, i) => {
-      const card = document.createElement('div');
-      card.className = 'saved-card';
-      card.innerHTML = `
-        <div class="saved-card-name">${escHtml(r.name)}</div>
-        <div class="saved-card-protein">${r.macros?.protein ?? '?'}g protein</div>
-        <div class="saved-card-meta">${escHtml(r.prepTime || '')} prep · ${escHtml(r.cookTime || '')} cook</div>
-      `;
-      card.onclick = () => {
-        currentRecipe = r;
-        renderRecipe(r);
+    // Click on body to load recipe
+    if (recipe) {
+      slot.querySelector('.meal-slot-body').style.cursor = 'pointer';
+      slot.querySelector('.meal-slot-body').onclick = () => {
+        currentRecipe = recipe;
+        switchTab('find');
+        renderRecipe(recipe);
         hideStatus();
       };
-      grid.appendChild(card);
-    });
-  }
+    }
 
-  function clearSaved() {
-    if (!confirm('Clear all saved recipes?')) return;
-    localStorage.removeItem('macro_saved_recipes');
-    renderSaved();
-  }
+    grid.appendChild(slot);
+  });
+}
 
-  /* ── Utility ── */
-  function escHtml(str) {
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
-  }
+function removeFromPlan(i) {
+  mealPlan[i] = null;
+  renderMealPlan();
+}
 
-  /* ── Init ── */
-  updateDemoBanner();
-  renderSaved();
+/* ═══════════════════════════════════════════════════════
+   SLOT MODAL
+   ═══════════════════════════════════════════════════════ */
+function openSlotModal(i) {
+  activeSlot = i;
+  document.getElementById('modalTitle').textContent = `Generate ${MEAL_SLOTS[i]}`;
+
+  // Compute remaining macros
+  const remaining = getRemainingMacros(i);
+  document.getElementById('modalSub').textContent =
+    `Remaining budget: ~${remaining.calories} kcal · ${remaining.protein}g protein · ${remaining.carbs}g carbs · ${remaining.fat}g fat`;
+
+  document.getElementById('modalCraving').value = '';
+  document.getElementById('slotModal').classList.add('visible');
+  document.getElementById('modalCraving').focus();
+}
+
+function closeModal() {
+  document.getElementById('slotModal').classList.remove('visible');
+  activeSlot = null;
+}
+
+function getRemainingMacros(excludeSlot) {
+  const day = getDayTargets();
+  const used = mealPlan.reduce((acc, r, i) => {
+    if (!r || i === excludeSlot) return acc;
+    return {
+      calories: acc.calories + (r.macros?.calories || 0),
+      protein:  acc.protein  + (r.macros?.protein  || 0),
+      carbs:    acc.carbs    + (r.macros?.carbs     || 0),
+      fat:      acc.fat      + (r.macros?.fat       || 0),
+    };
+  }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
+
+  return {
+    calories: Math.max(0, day.calories - used.calories),
+    protein:  Math.max(0, day.protein  - used.protein),
+    carbs:    Math.max(0, day.carbs    - used.carbs),
+    fat:      Math.max(0, day.fat      - used.fat),
+  };
+}
+
+function generateForSlot() {
+  if (activeSlot === null) return;
+  const remaining = getRemainingMacros(activeSlot);
+  generate(activeSlot, remaining);
+}
+
+// Close modal on overlay click
+document.getElementById('slotModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+/* ═══════════════════════════════════════════════════════
+   UTILITY
+   ═══════════════════════════════════════════════════════ */
+function esc(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+/* ═══════════════════════════════════════════════════════
+   INIT
+   ═══════════════════════════════════════════════════════ */
+updateDemoBanner();
+updatePlanTargets();
+renderSaved();
+renderMealPlan();
 </script>
 </body>
 </html>
