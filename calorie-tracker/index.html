@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nutr — Calorie Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="app">
+
+  <!-- ── Header ── -->
+  <header class="app-header">
+    <div class="logo">Nutr<span>.</span></div>
+    <div class="header-date" id="headerDate"></div>
+  </header>
+
+  <!-- ── Dashboard ── -->
+  <section class="dashboard">
+    <div class="dash-card primary" id="calCard">
+      <div class="dash-value" id="dashCalories">0</div>
+      <div class="dash-label">Calories</div>
+      <div class="dash-goal" id="dashCalGoal">/ 2000 goal</div>
+    </div>
+    <div class="dash-card">
+      <div class="dash-value" id="dashProtein">0g</div>
+      <div class="dash-label">Protein</div>
+    </div>
+    <div class="dash-card">
+      <div class="dash-value" id="dashCarbs">0g</div>
+      <div class="dash-label">Carbs</div>
+    </div>
+    <div class="dash-card">
+      <div class="dash-value" id="dashFat">0g</div>
+      <div class="dash-label">Fat</div>
+    </div>
+    <div class="dash-card water">
+      <div class="dash-value" id="dashWater">0</div>
+      <div class="dash-label">Glasses of Water</div>
+    </div>
+  </section>
+
+  <!-- ── Chat section ── -->
+  <section class="chat-section">
+    <!-- Message bubbles -->
+    <div class="chat-messages" id="chatMessages"></div>
+
+    <!-- Quick-add chips -->
+    <div class="quick-chips" id="quickChips"></div>
+
+    <!-- Text input -->
+    <div class="chat-input-row">
+      <input
+        type="text"
+        id="chatInput"
+        class="chat-input"
+        placeholder="e.g. just had a latte, or 2 glasses of water…"
+        autocomplete="off"
+      />
+      <button class="send-btn" id="sendBtn">Send</button>
+    </div>
+  </section>
+
+  <!-- ── Food Log ── -->
+  <section class="log-section">
+    <div class="log-header">
+      <div class="log-title">Today's Log</div>
+      <button class="clear-log-btn" id="clearLogBtn">Clear day</button>
+    </div>
+    <div class="log-list" id="logList"></div>
+  </section>
+
+</div>
+<script src="script.js"></script>
+</body>
+</html>
